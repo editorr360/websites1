@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BLADE — Barbearia Premium</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --black:#0a0a0a;
+  --black2:#111111;
+  --black3:#1a1a1a;
+  --charcoal:#222222;
+  --gold:#c9a84c;
+  --gold-light:#e8c97a;
+  --gold-dim:rgba(201,168,76,0.15);
+  --white:#f4f0e8;
+  --gray:#888880;
+  --gray-light:#555550;
+}
+
+html{scroll-behavior:smooth}
+
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--black);
+  color:var(--white);
+  overflow-x:hidden;
+  cursor:none;
+}
+
+/* ── CUSTOM CURSOR ── */
+.cursor{
+  width:8px;height:8px;
+  background:var(--gold);
+  border-radius:50%;
+  position:fixed;top:0;left:0;
+  pointer-events:none;z-index:9999;
+  transform:translate(-50%,-50%);
+  transition:transform 0.1s,width 0.3s,height 0.3s,background 0.3s;
+  mix-blend-mode:normal;
+}
+.cursor-ring{
+  width:36px;height:36px;
+  border:1px solid rgba(201,168,76,0.5);
+  border-radius:50%;
+  position:fixed;top:0;left:0;
+  pointer-events:none;z-index:9998;
+  transform:translate(-50%,-50%);
+  transition:transform 0.18s ease-out,width 0.3s,height 0.3s,opacity 0.3s;
+}
+body:hover .cursor{opacity:1}
+@media(max-width:768px){.cursor,.cursor-ring{display:none}body{cursor:auto}}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;width:100%;z-index:100;
+  padding:28px 60px;
+  display:flex;justify-content:space-between;align-items:center;
+  transition:all 0.5s;
+}
+nav.scrolled{
+  background:rgba(10,10,10,0.95);
+  padding:18px 60px;
+  border-bottom:1px solid rgba(201,168,76,0.12);
+  backdrop-filter:blur(20px);
+}
+.nav-logo{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:28px;letter-spacing:6px;
+  color:var(--gold);text-decoration:none;
+}
+.nav-logo span{color:var(--white)}
+.nav-links{display:flex;gap:44px;list-style:none}
+.nav-links a{
+  font-size:10px;font-weight:300;letter-spacing:3px;text-transform:uppercase;
+  text-decoration:none;color:rgba(244,240,232,0.55);
+  transition:color 0.3s;position:relative;
+}
+.nav-links a::after{
+  content:'';position:absolute;bottom:-6px;left:0;
+  width:0;height:1px;background:var(--gold);
+  transition:width 0.4s cubic-bezier(0.22,1,0.36,1);
+}
+.nav-links a:hover{color:var(--gold)}
+.nav-links a:hover::after{width:100%}
+
+.nav-cta{
+  font-size:9px;font-weight:300;letter-spacing:3px;text-transform:uppercase;
+  padding:11px 28px;border:1px solid var(--gold);color:var(--gold);
+  text-decoration:none;transition:all 0.3s;background:transparent;
+}
+.nav-cta:hover{background:var(--gold);color:var(--black)}
+
+/* Hamburger */
+.hamburger{display:none;flex-direction:column;gap:6px;cursor:pointer;background:none;border:none;padding:4px}
+.hamburger span{display:block;width:26px;height:1px;background:var(--white);transition:all 0.3s}
+.hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+.mobile-menu{
+  display:none;position:fixed;inset:0;background:var(--black2);
+  z-index:99;flex-direction:column;align-items:center;justify-content:center;gap:44px;
+}
+.mobile-menu.open{display:flex}
+.mobile-menu a{
+  font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:4px;
+  color:var(--white);text-decoration:none;transition:color 0.3s;
+}
+.mobile-menu a:hover{color:var(--gold)}
+.mobile-menu .cta-mobile{
+  font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;
+  padding:16px 44px;border:1px solid var(--gold);color:var(--gold);
+  text-decoration:none;margin-top:16px;
+}
+
+/* ── HERO ── */
+#hero{
+  position:relative;height:100vh;min-height:680px;
+  display:flex;align-items:flex-end;
+  overflow:hidden;
+}
+.hero-bg{
+  position:absolute;inset:0;
+  background:url('https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=1800&q=85') center 30%/cover no-repeat;
+}
+.hero-bg::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(to right, rgba(10,10,10,0.92) 40%, rgba(10,10,10,0.3) 100%),
+             linear-gradient(to top, rgba(10,10,10,0.8) 0%, transparent 50%);
+}
+
+/* Grain texture */
+.hero-bg::before{
+  content:'';position:absolute;inset:0;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity:0.35;pointer-events:none;
+}
+
+.hero-content{
+  position:relative;z-index:2;
+  padding:0 60px 80px;
+  max-width:700px;
+  animation:heroIn 1.2s cubic-bezier(0.22,1,0.36,1) both;
+}
+@keyframes heroIn{
+  from{opacity:0;transform:translateY(50px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.hero-eyebrow{
+  display:flex;align-items:center;gap:16px;
+  font-size:9px;letter-spacing:5px;text-transform:uppercase;
+  color:var(--gold);margin-bottom:24px;
+}
+.hero-eyebrow::before{content:'';display:block;width:40px;height:1px;background:var(--gold)}
+
+.hero-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(72px,10vw,140px);
+  line-height:0.92;letter-spacing:2px;
+  color:var(--white);margin-bottom:32px;
+}
+.hero-title .gold{color:var(--gold)}
+
+.hero-sub{
+  font-size:14px;font-weight:200;line-height:2;
+  color:rgba(244,240,232,0.55);margin-bottom:52px;
+  max-width:400px;
+}
+
+.hero-actions{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.btn-gold{
+  display:inline-flex;align-items:center;gap:12px;
+  padding:18px 44px;background:var(--gold);
+  color:var(--black);font-size:10px;font-weight:400;
+  letter-spacing:3px;text-transform:uppercase;text-decoration:none;
+  transition:all 0.3s;
+}
+.btn-gold:hover{background:var(--gold-light)}
+.btn-ghost{
+  font-size:10px;letter-spacing:3px;text-transform:uppercase;
+  color:rgba(244,240,232,0.5);text-decoration:none;
+  border-bottom:1px solid rgba(244,240,232,0.2);
+  padding-bottom:3px;transition:all 0.3s;
+}
+.btn-ghost:hover{color:var(--white);border-color:var(--white)}
+
+.hero-badge{
+  position:absolute;right:60px;bottom:80px;z-index:2;
+  width:110px;height:110px;
+  border:1px solid rgba(201,168,76,0.3);border-radius:50%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  animation:spin 20s linear infinite;
+}
+.hero-badge-inner{
+  position:absolute;inset:8px;border-radius:50%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;
+}
+.hero-badge-inner strong{
+  font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--gold);line-height:1;
+}
+.hero-badge-inner span{font-size:7px;letter-spacing:2px;text-transform:uppercase;color:var(--gray);margin-top:2px}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+.hero-scroll{
+  position:absolute;bottom:40px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  color:var(--gray);font-size:8px;letter-spacing:3px;text-transform:uppercase;
+  animation:fadeIn 2s 1.2s both;
+}
+.scroll-track{width:1px;height:48px;background:rgba(255,255,255,0.1);position:relative;overflow:hidden}
+.scroll-track::after{
+  content:'';position:absolute;top:-100%;left:0;width:100%;height:50%;
+  background:var(--gold);animation:drop 2s 1.5s ease-in-out infinite;
+}
+@keyframes drop{0%{top:-50%}100%{top:100%}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* ── BAND ── */
+.band{
+  background:var(--gold);padding:18px 0;overflow:hidden;
+  display:flex;gap:0;white-space:nowrap;
+}
+.band-track{
+  display:inline-flex;gap:48px;
+  animation:marquee 18s linear infinite;
+}
+.band-track span{
+  font-family:'Bebas Neue',sans-serif;font-size:13px;
+  letter-spacing:4px;color:var(--black);
+}
+.band-track span.dot{color:rgba(10,10,10,0.35);font-size:18px;line-height:1}
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ── SERVIÇOS ── */
+#servicos{padding:120px 0;background:var(--black2)}
+.container{max-width:1200px;margin:0 auto;padding:0 60px}
+
+.section-head{margin-bottom:72px}
+.section-label{
+  font-size:9px;letter-spacing:5px;text-transform:uppercase;
+  color:var(--gold);display:flex;align-items:center;gap:16px;margin-bottom:16px;
+}
+.section-label::before{content:'';width:32px;height:1px;background:var(--gold)}
+.section-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(48px,5vw,80px);letter-spacing:2px;
+  color:var(--white);line-height:1;
+}
+.section-title em{color:var(--gold);font-style:italic;font-family:'Libre Baskerville',serif;font-size:0.8em}
+
+.servicos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,0.06)}
+.servico-card{
+  background:var(--black2);padding:60px 44px;
+  position:relative;overflow:hidden;
+  transition:background 0.4s;
+}
+.servico-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;
+  height:2px;background:var(--gold);
+  transform:scaleX(0);transform-origin:left;
+  transition:transform 0.5s cubic-bezier(0.22,1,0.36,1);
+}
+.servico-card:hover::before{transform:scaleX(1)}
+.servico-card:hover{background:var(--black3)}
+
+.servico-num{
+  font-family:'Bebas Neue',sans-serif;font-size:80px;
+  color:rgba(255,255,255,0.04);line-height:1;
+  position:absolute;top:20px;right:24px;user-select:none;
+  transition:color 0.4s;
+}
+.servico-card:hover .servico-num{color:rgba(201,168,76,0.06)}
+
+.servico-icon{
+  width:52px;height:52px;margin-bottom:32px;
+  border:1px solid rgba(201,168,76,0.25);
+  display:flex;align-items:center;justify-content:center;
+  transition:border-color 0.3s,background 0.3s;
+}
+.servico-card:hover .servico-icon{border-color:var(--gold);background:var(--gold-dim)}
+.servico-icon svg{width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.2}
+
+.servico-nome{
+  font-family:'Libre Baskerville',serif;
+  font-size:26px;font-weight:400;color:var(--white);
+  margin-bottom:16px;line-height:1.2;
+}
+.servico-desc{font-size:13px;font-weight:200;line-height:2;color:var(--gray);margin-bottom:32px}
+.servico-price{
+  font-family:'Bebas Neue',sans-serif;font-size:36px;
+  color:var(--gold);letter-spacing:2px;
+}
+.servico-price sup{font-size:16px;vertical-align:super}
+.servico-price small{font-family:'DM Sans',sans-serif;font-size:11px;color:var(--gray-light);letter-spacing:1px;margin-left:4px}
+
+/* extras row */
+.servicos-extras{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:1px;background:rgba(255,255,255,0.06);margin-top:1px;
+}
+.extra-item{
+  background:var(--black2);padding:32px 36px;
+  display:flex;justify-content:space-between;align-items:center;
+  transition:background 0.3s;
+}
+.extra-item:hover{background:var(--black3)}
+.extra-name{font-size:13px;font-weight:300;color:rgba(244,240,232,0.65);letter-spacing:1px}
+.extra-val{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);letter-spacing:1px}
+
+/* ── GALERIA ── */
+#galeria{padding:120px 0;background:var(--black)}
+.galeria-intro{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:56px;flex-wrap:wrap;gap:24px}
+.galeria-intro p{font-size:13px;font-weight:200;line-height:2;color:var(--gray);max-width:360px}
+
+.galeria-grid{
+  display:grid;
+  grid-template-columns:repeat(12,1fr);
+  grid-template-rows:260px 260px;
+  gap:8px;
+}
+.galeria-item{overflow:hidden;position:relative;cursor:pointer}
+.galeria-item:nth-child(1){grid-column:1/5;grid-row:1/3}
+.galeria-item:nth-child(2){grid-column:5/8;grid-row:1}
+.galeria-item:nth-child(3){grid-column:8/13;grid-row:1}
+.galeria-item:nth-child(4){grid-column:5/8;grid-row:2}
+.galeria-item:nth-child(5){grid-column:8/11;grid-row:2}
+.galeria-item:nth-child(6){grid-column:11/13;grid-row:2}
+
+.galeria-item img{
+  width:100%;height:100%;object-fit:cover;
+  transition:transform 0.8s cubic-bezier(0.22,1,0.36,1),filter 0.5s;
+  filter:grayscale(20%);
+}
+.galeria-item:hover img{transform:scale(1.08);filter:grayscale(0%)}
+.galeria-item::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(10,10,10,0.6) 0%,transparent 60%);
+  opacity:0;transition:opacity 0.4s;
+}
+.galeria-item:hover::after{opacity:1}
+.galeria-overlay{
+  position:absolute;bottom:20px;left:20px;z-index:2;
+  opacity:0;transform:translateY(8px);
+  transition:all 0.4s;
+}
+.galeria-item:hover .galeria-overlay{opacity:1;transform:translateY(0)}
+.galeria-overlay span{
+  font-size:9px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--gold);background:rgba(10,10,10,0.6);padding:6px 12px;
+}
+
+/* ── AVALIAÇÕES ── */
+#avaliacoes{padding:120px 0;background:var(--black3);position:relative;overflow:hidden}
+#avaliacoes::before{
+  content:'';position:absolute;top:-200px;right:-200px;
+  width:500px;height:500px;border-radius:50%;
+  background:radial-gradient(circle, rgba(201,168,76,0.05) 0%, transparent 70%);
+}
+
+.reviews-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:72px}
+.review-card{
+  background:var(--black2);padding:44px 36px;
+  border:1px solid rgba(255,255,255,0.05);
+  position:relative;transition:border-color 0.4s,transform 0.4s;
+}
+.review-card:hover{border-color:rgba(201,168,76,0.2);transform:translateY(-4px)}
+.review-card::before{
+  content:'\201C';
+  font-family:'Libre Baskerville',serif;font-size:80px;
+  color:var(--gold);opacity:0.2;
+  position:absolute;top:16px;left:28px;line-height:1;
+}
+.stars{display:flex;gap:4px;margin-bottom:24px}
+.stars span{color:var(--gold);font-size:13px}
+.review-text{
+  font-family:'Libre Baskerville',serif;font-style:italic;
+  font-size:15px;line-height:1.8;color:rgba(244,240,232,0.75);
+  margin-bottom:32px;position:relative;z-index:1;
+}
+.review-author{display:flex;align-items:center;gap:16px;border-top:1px solid rgba(255,255,255,0.06);padding-top:24px}
+.review-avatar{
+  width:46px;height:46px;border-radius:50%;
+  background:var(--charcoal);overflow:hidden;flex-shrink:0;
+  border:1px solid rgba(201,168,76,0.2);
+}
+.review-avatar img{width:100%;height:100%;object-fit:cover}
+.review-name{font-size:13px;font-weight:400;color:var(--white);margin-bottom:2px}
+.review-detail{font-size:10px;letter-spacing:1px;color:var(--gray)}
+
+/* ── CTA AGENDAR ── */
+#agendar{padding:100px 0;background:var(--black);text-align:center}
+.cta-wrap{
+  max-width:680px;margin:0 auto;padding:0 24px;
+}
+.cta-tag{
+  display:inline-block;
+  font-size:9px;letter-spacing:5px;text-transform:uppercase;
+  color:var(--gold);border:1px solid rgba(201,168,76,0.25);
+  padding:8px 20px;margin-bottom:40px;
+}
+.cta-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(52px,7vw,96px);letter-spacing:2px;
+  line-height:0.95;color:var(--white);margin-bottom:24px;
+}
+.cta-title span{color:var(--gold)}
+.cta-sub{font-size:14px;font-weight:200;color:var(--gray);line-height:2;margin-bottom:52px}
+.btn-whatsapp{
+  display:inline-flex;align-items:center;gap:14px;
+  padding:22px 60px;background:var(--gold);
+  color:var(--black);font-size:11px;font-weight:400;
+  letter-spacing:3px;text-transform:uppercase;text-decoration:none;
+  transition:all 0.3s;position:relative;overflow:hidden;
+}
+.btn-whatsapp::before{
+  content:'';position:absolute;inset:0;background:var(--gold-light);
+  transform:scaleX(0);transform-origin:left;
+  transition:transform 0.4s cubic-bezier(0.22,1,0.36,1);
+}
+.btn-whatsapp:hover::before{transform:scaleX(1)}
+.btn-whatsapp span,.btn-whatsapp svg{position:relative;z-index:1}
+.btn-whatsapp svg{width:22px;height:22px;fill:var(--black)}
+
+.horarios{
+  display:flex;justify-content:center;gap:52px;
+  margin-top:64px;padding-top:52px;
+  border-top:1px solid rgba(255,255,255,0.06);
+  flex-wrap:wrap;
+}
+.horario-item{text-align:center}
+.horario-dia{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gray);margin-bottom:8px}
+.horario-horas{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--white);letter-spacing:2px}
+
+/* ── FOOTER ── */
+footer{background:var(--black2);padding:60px;border-top:1px solid rgba(255,255,255,0.05)}
+.footer-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:32px}
+.footer-logo-wrap .logo-name{
+  font-family:'Bebas Neue',sans-serif;font-size:32px;
+  letter-spacing:6px;color:var(--gold);
+}
+.footer-logo-wrap .logo-tagline{
+  font-size:9px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--gray);margin-top:4px;
+}
+.footer-social{display:flex;gap:20px}
+.social-link{
+  width:40px;height:40px;border:1px solid rgba(255,255,255,0.1);
+  display:flex;align-items:center;justify-content:center;
+  text-decoration:none;transition:all 0.3s;
+}
+.social-link:hover{border-color:var(--gold);background:var(--gold-dim)}
+.social-link svg{width:16px;height:16px;fill:var(--gray);transition:fill 0.3s}
+.social-link:hover svg{fill:var(--gold)}
+.footer-copy{font-size:11px;color:rgba(255,255,255,0.2);letter-spacing:1px;font-weight:200}
+
+/* ── REVEAL ── */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity 0.9s cubic-bezier(0.22,1,0.36,1),transform 0.9s cubic-bezier(0.22,1,0.36,1)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:0.1s}
+.reveal-delay-2{transition-delay:0.2s}
+.reveal-delay-3{transition-delay:0.3s}
+.reveal-delay-4{transition-delay:0.4s}
+.reveal-delay-5{transition-delay:0.5s}
+
+/* ── RESPONSIVE ── */
+@media(max-width:960px){
+  nav{padding:20px 24px}
+  nav.scrolled{padding:14px 24px}
+  .nav-links,.nav-cta{display:none}
+  .hamburger{display:flex}
+  .container{padding:0 24px}
+  #servicos,#galeria,#avaliacoes,#agendar{padding:80px 0}
+  .servicos-grid{grid-template-columns:1fr}
+  .servicos-extras{grid-template-columns:1fr 1fr}
+  .galeria-grid{
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:auto;
+  }
+  .galeria-item:nth-child(1){grid-column:1/3;grid-row:1}
+  .galeria-item:nth-child(2){grid-column:1/2;grid-row:2}
+  .galeria-item:nth-child(3){grid-column:2/3;grid-row:2}
+  .galeria-item:nth-child(4){grid-column:1/2;grid-row:3}
+  .galeria-item:nth-child(5){grid-column:2/3;grid-row:3}
+  .galeria-item:nth-child(6){grid-column:1/3;grid-row:4}
+  .galeria-grid{grid-template-rows:220px 220px 220px 220px}
+  .reviews-grid{grid-template-columns:1fr}
+  .hero-content{padding:0 24px 80px}
+  .hero-badge{right:24px;bottom:100px;width:88px;height:88px}
+  .hero-badge-inner strong{font-size:24px}
+  footer{padding:40px 24px}
+  .footer-inner{flex-direction:column;text-align:center}
+  .footer-social{justify-content:center}
+  .horarios{gap:32px}
+}
+@media(max-width:560px){
+  .hero-title{font-size:64px}
+  .hero-badge{display:none}
+  .servicos-extras{grid-template-columns:1fr}
+  .galeria-grid{grid-template-columns:1fr;grid-template-rows:auto}
+  .galeria-item{height:240px}
+  .galeria-item:nth-child(1),.galeria-item:nth-child(2),.galeria-item:nth-child(3),
+  .galeria-item:nth-child(4),.galeria-item:nth-child(5),.galeria-item:nth-child(6){
+    grid-column:1;grid-row:auto;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="nav-logo">BLA<span>DE</span></a>
+  <ul class="nav-links">
+    <li><a href="#servicos">Serviços</a></li>
+    <li><a href="#galeria">Galeria</a></li>
+    <li><a href="#avaliacoes">Avaliações</a></li>
+  </ul>
+  <a href="https://wa.me/5511999999999" target="_blank" class="nav-cta">Agendar</a>
+  <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#servicos" class="mobile-link">Serviços</a>
+  <a href="#galeria" class="mobile-link">Galeria</a>
+  <a href="#avaliacoes" class="mobile-link">Avaliações</a>
+  <a href="https://wa.me/5511999999999" target="_blank" class="cta-mobile">Agendar Horário</a>
+</div>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Barbearia Premium · Desde 2014</div>
+    <h1 class="hero-title">THE<br><span class="gold">ART</span><br>OF CUT</h1>
+    <p class="hero-sub">Precisão, estilo e identidade. Cada corte é uma obra feita para durar.</p>
+    <div class="hero-actions">
+      <a href="https://wa.me/5511999999999" target="_blank" class="btn-gold">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zm-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884zm8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Agendar Agora
+      </a>
+      <a href="#galeria" class="btn-ghost">Ver Galeria</a>
+    </div>
+  </div>
+  <div class="hero-badge">
+    <div class="hero-badge-inner">
+      <strong>10+</strong>
+      <span>Anos no mercado</span>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <div class="scroll-track"></div>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<!-- BAND -->
+<div class="band">
+  <div class="band-track">
+    <span>CORTE CLÁSSICO</span><span class="dot">✦</span>
+    <span>BARBA PERFEITA</span><span class="dot">✦</span>
+    <span>ACABAMENTO PREMIUM</span><span class="dot">✦</span>
+    <span>NAVALHADO</span><span class="dot">✦</span>
+    <span>SOBRANCELHA</span><span class="dot">✦</span>
+    <span>EXPERIÊNCIA ÚNICA</span><span class="dot">✦</span>
+    <span>CORTE CLÁSSICO</span><span class="dot">✦</span>
+    <span>BARBA PERFEITA</span><span class="dot">✦</span>
+    <span>ACABAMENTO PREMIUM</span><span class="dot">✦</span>
+    <span>NAVALHADO</span><span class="dot">✦</span>
+    <span>SOBRANCELHA</span><span class="dot">✦</span>
+    <span>EXPERIÊNCIA ÚNICA</span><span class="dot">✦</span>
+  </div>
+</div>
+
+<!-- SERVIÇOS -->
+<section id="servicos">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="section-label">O que oferecemos</div>
+      <h2 class="section-title">Serviços <em>feitos</em><br>com maestria</h2>
+    </div>
+    <div class="servicos-grid">
+      <div class="servico-card reveal">
+        <span class="servico-num">01</span>
+        <div class="servico-icon">
+          <svg viewBox="0 0 24 24"><path d="M6 2 L6 22 M6 12 L18 12 M18 8 L18 16" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="servico-nome">Corte Masculino</div>
+        <p class="servico-desc">Do fade ao clássico, cada corte é executado com técnica apurada e atenção ao detalhe. Consultoria de estilo inclusa.</p>
+        <div class="servico-price"><sup>R$</sup>75<small>a partir de</small></div>
+      </div>
+      <div class="servico-card reveal reveal-delay-1">
+        <span class="servico-num">02</span>
+        <div class="servico-icon">
+          <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="servico-nome">Barba & Navalha</div>
+        <p class="servico-desc">Ritual completo de barba com toalha quente, produtos premium e acabamento à navalha. Experiência de barbearia tradicional.</p>
+        <div class="servico-price"><sup>R$</sup>60<small>a partir de</small></div>
+      </div>
+      <div class="servico-card reveal reveal-delay-2">
+        <span class="servico-num">03</span>
+        <div class="servico-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" stroke-linecap="round"/></svg>
+        </div>
+        <div class="servico-nome">Acabamento & Spa</div>
+        <p class="servico-desc">Hidratação capilar, sobrancelha, limpeza de pele e relaxamento. O cuidado completo que você merece.</p>
+        <div class="servico-price"><sup>R$</sup>45<small>a partir de</small></div>
+      </div>
+    </div>
+    <div class="servicos-extras reveal">
+      <div class="extra-item">
+        <span class="extra-name">Corte + Barba</span>
+        <span class="extra-val">R$ 120</span>
+      </div>
+      <div class="extra-item">
+        <span class="extra-name">Platinado</span>
+        <span class="extra-val">R$ 180</span>
+      </div>
+      <div class="extra-item">
+        <span class="extra-name">Sobrancelha</span>
+        <span class="extra-val">R$ 30</span>
+      </div>
+      <div class="extra-item">
+        <span class="extra-name">Pigmentação</span>
+        <span class="extra-val">R$ 90</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GALERIA -->
+<section id="galeria">
+  <div class="container">
+    <div class="galeria-intro">
+      <div>
+        <div class="section-label reveal">Nosso Trabalho</div>
+        <h2 class="section-title reveal reveal-delay-1">Galeria<br><em>de cortes</em></h2>
+      </div>
+      <p class="reveal reveal-delay-2">Cada foto conta uma história de precisão e estilo. Conheça o trabalho dos nossos barbeiros.</p>
+    </div>
+    <div class="galeria-grid reveal">
+      <div class="galeria-item">
+        <img src="https://images.unsplash.com/photo-1605497788044-5a32c7078486?w=800&q=80" alt="Corte fade" loading="lazy">
+        <div class="galeria-overlay"><span>Fade Clássico</span></div>
+      </div>
+      <div class="galeria-item">
+        <img src="https://images.unsplash.com/photo-1599351431202-1e0f0137899a?w=800&q=80" alt="Barba" loading="lazy">
+        <div class="galeria-overlay"><span>Barba Delineada</span></div>
+      </div>
+      <div class="galeria-item">
+        <img src="https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=800&q=80" alt="Corte moderno" loading="lazy">
+        <div class="galeria-overlay"><span>Skin Fade</span></div>
+      </div>
+      <div class="galeria-item">
+        <img src="https://images.unsplash.com/photo-1493256338651-d82f7acb2b38?w=800&q=80" alt="Acabamento" loading="lazy">
+        <div class="galeria-overlay"><span>Tesoura + Fade</span></div>
+      </div>
+      <div class="galeria-item">
+        <img src="https://images.unsplash.com/photo-1622286342621-4bd786c2447c?w=800&q=80" alt="Barbearia" loading="lazy">
+        <div class="galeria-overlay"><span>Ambiente Premium</span></div>
+      </div>
+      <div class="galeria-item">
+        <img src="https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=800&q=80" alt="Navalha" loading="lazy">
+        <div class="galeria-overlay"><span>Ritual de Barba</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AVALIAÇÕES -->
+<section id="avaliacoes">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="section-label">Clientes</div>
+      <h2 class="section-title">O que dizem<br><em>sobre nós</em></h2>
+    </div>
+    <div class="reviews-grid">
+      <div class="review-card reveal reveal-delay-1">
+        <div class="stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+        <p class="review-text">Melhor barbearia que já fui. O ambiente é impecável, o atendimento é diferenciado e o corte ficou exatamente como eu queria. Virei cliente fixo.</p>
+        <div class="review-author">
+          <div class="review-avatar"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80" alt="" loading="lazy"></div>
+          <div>
+            <div class="review-name">Ricardo Almeida</div>
+            <div class="review-detail">Cliente há 3 anos</div>
+          </div>
+        </div>
+      </div>
+      <div class="review-card reveal reveal-delay-2">
+        <div class="stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+        <p class="review-text">O ritual de barba com navalha é uma experiência à parte. Saí de lá me sentindo outro cara. Vale cada centavo — zero comparação com barbearia comum.</p>
+        <div class="review-author">
+          <div class="review-avatar"><img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&q=80" alt="" loading="lazy"></div>
+          <div>
+            <div class="review-name">Marcos Oliveira</div>
+            <div class="review-detail">Cliente há 1 ano</div>
+          </div>
+        </div>
+      </div>
+      <div class="review-card reveal reveal-delay-3">
+        <div class="stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+        <p class="review-text">Fui pela primeira vez indicado por um amigo e não saio mais de lá. O pessoal entende exatamente o que você quer e entrega mais do que esperado.</p>
+        <div class="review-author">
+          <div class="review-avatar"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80" alt="" loading="lazy"></div>
+          <div>
+            <div class="review-name">Felipe Santos</div>
+            <div class="review-detail">Cliente há 6 meses</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA AGENDAR -->
+<section id="agendar">
+  <div class="cta-wrap">
+    <span class="cta-tag reveal">Agende seu horário</span>
+    <h2 class="cta-title reveal reveal-delay-1">PRONTO<br>PARA O<br><span>PRÓXIMO</span><br>NÍVEL?</h2>
+    <p class="cta-sub reveal reveal-delay-2">Reserve seu horário agora mesmo pelo WhatsApp. Atendimento rápido, sem enrolação.</p>
+    <a href="https://wa.me/5511999999999?text=Olá!%20Quero%20agendar%20um%20horário%20na%20BLADE." target="_blank" class="btn-whatsapp reveal reveal-delay-3">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zm-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884zm8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      <span>Agendar pelo WhatsApp</span>
+    </a>
+    <div class="horarios reveal reveal-delay-4">
+      <div class="horario-item">
+        <div class="horario-dia">Seg — Sex</div>
+        <div class="horario-horas">09:00 – 20:00</div>
+      </div>
+      <div class="horario-item">
+        <div class="horario-dia">Sábado</div>
+        <div class="horario-horas">08:00 – 18:00</div>
+      </div>
+      <div class="horario-item">
+        <div class="horario-dia">Domingo</div>
+        <div class="horario-horas">10:00 – 15:00</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo-wrap">
+      <div class="logo-name">BLADE</div>
+      <div class="logo-tagline">Barbearia Premium · São Paulo</div>
+    </div>
+    <div class="footer-social">
+      <a href="#" class="social-link" aria-label="Instagram">
+        <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+      </a>
+      <a href="#" class="social-link" aria-label="TikTok">
+        <svg viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+      </a>
+    </div>
+    <div class="footer-copy">© 2024 BLADE Barbearia. Todos os direitos reservados.</div>
+  </div>
+</footer>
+
+<script>
+// Custom cursor
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mouseX=0,mouseY=0,ringX=0,ringY=0;
+document.addEventListener('mousemove',e=>{
+  mouseX=e.clientX;mouseY=e.clientY;
+  cursor.style.left=mouseX+'px';cursor.style.top=mouseY+'px';
+});
+function animateRing(){
+  ringX+=(mouseX-ringX)*0.12;
+  ringY+=(mouseY-ringY)*0.12;
+  ring.style.left=ringX+'px';ring.style.top=ringY+'px';
+  requestAnimationFrame(animateRing);
+}
+animateRing();
+document.querySelectorAll('a,button').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{
+    cursor.style.width='16px';cursor.style.height='16px';
+    ring.style.width='56px';ring.style.height='56px';
+  });
+  el.addEventListener('mouseleave',()=>{
+    cursor.style.width='8px';cursor.style.height='8px';
+    ring.style.width='36px';ring.style.height='36px';
+  });
+});
+
+// Nav scroll
+const nav = document.getElementById('nav');
+window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',scrollY>60));
+
+// Hamburger
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobileMenu');
+hamburger.addEventListener('click',()=>{
+  hamburger.classList.toggle('open');
+  mobileMenu.classList.toggle('open');
+  document.body.style.overflow = mobileMenu.classList.contains('open')?'hidden':'';
+});
+document.querySelectorAll('.mobile-link,.cta-mobile').forEach(l=>{
+  l.addEventListener('click',()=>{
+    hamburger.classList.remove('open');
+    mobileMenu.classList.remove('open');
+    document.body.style.overflow='';
+  });
+});
+
+// Scroll reveal
+const reveals = document.querySelectorAll('.reveal');
+new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')});
+},{threshold:0.1}).observe ? 
+  reveals.forEach(el=>new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')});
+  },{threshold:0.1}).observe(el)) : null;
+</script>
+</body>
+</html>
